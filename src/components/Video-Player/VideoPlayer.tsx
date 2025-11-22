@@ -230,9 +230,9 @@ export default function VideoPlayer() {
                             />
                         </div>
                     </div>
-                    <div id="buttons" className="flex flex-row gap-2">
+                    <div id="buttons" className="flex flex-row gap-2 text-foreground">
                         <button
-                            className='playBtn flex items-center cursor-pointer p-0 w-fit text-foreground'
+                            className='playBtn flex items-center cursor-pointer p-0 w-fit'
                             onClick={handlePlayPauseClick}>
                             {!videoRef.current?.paused ? (
                                 <Pause />
@@ -240,14 +240,14 @@ export default function VideoPlayer() {
                                 <Play />
                             )}
                         </button>
-                        <div className="text-foreground">
+                        <div>
                             <span>{secondsToHHMMSS(currentTime || 0)}</span>
                             <span>/</span>
                             <span>{secondsToHHMMSS(duration || 0)}</span>
                         </div>
                         <div className="group/volume flex flex-row gap-2 w-fit">
                             <button
-                                className='flex items-center cursor-pointer p-0 text-foreground'
+                                className='flex items-center cursor-pointer p-0'
                                 onClick={() => setMuted(prev => !prev)}
                             >
                                 {muted ? (

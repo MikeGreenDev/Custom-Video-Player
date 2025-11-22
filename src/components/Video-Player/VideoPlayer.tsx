@@ -1,10 +1,11 @@
-import { FullscreenIcon, Pause, Play, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
+import { FullscreenIcon, Pause, Play, PlaySquare, Slash, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { secondsToHHMMSS } from "./utils"
 
 export default function VideoPlayer() {
     const [_playing, setPlaying] = useState<boolean>(false)
     const [_fullscreen, setFullscreen] = useState<boolean>(false)
+    const [autoplay, setAutoPlay] = useState<boolean>(false)
     const [muted, setMuted] = useState<boolean>(false)
     const [volume, setVolume] = useState<number>(1)
 
@@ -207,7 +208,7 @@ export default function VideoPlayer() {
     return (
         <div className="h-fit">
             <div ref={videoContainerRef} className='flex h-fit bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
-                <video ref={videoRef} onClick={handlePlayPauseClick}>
+                <video ref={videoRef} onClick={handlePlayPauseClick} autoPlay={autoplay}>
                     <source src="test.mkv" />
                 </video>
                 <div className="Bottom-Controls block w-full absolute bottom-0 px-2">
@@ -277,11 +278,15 @@ export default function VideoPlayer() {
                             </div>
                         </div>
                         <div className="grow" />
-                        <div>
-                            <button title="Fullscreen" onClick={toggleFullscreen}>
-                                <FullscreenIcon />
-                            </button>
-                        </div>
+                        <button className="group/autoplay" onClick={() => setAutoPlay(!autoplay)}>
+                            <div className="relative">
+                                <PlaySquare />
+                                <Slash className={`absolute top-0 left-0 transition-discrete duration-300 ${!autoplay ? "opacity-100 w-full block" : "opacity-0 w-0 hidden"}`} />
+                            </div>
+                        </button>
+                        <button title="Fullscreen" onClick={toggleFullscreen}>
+                            <FullscreenIcon />
+                        </button>
                     </div>
                 </div>
             </div>

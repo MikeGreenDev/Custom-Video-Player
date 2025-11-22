@@ -14,6 +14,7 @@ export default function VideoPlayer() {
     const thumbRef = useRef<HTMLDivElement>(null)
     const progressRef = useRef<HTMLDivElement>(null)
     const bufferRef = useRef<HTMLDivElement>(null)
+    const volumeInputRef = useRef<HTMLInputElement>(null)
 
     const [currentTime, setCurrentTime] = useState<number>(videoRef.current?.currentTime || 0);
     const [duration, setDuration] = useState<number>(videoRef.current?.duration || 0);
@@ -33,10 +34,7 @@ export default function VideoPlayer() {
     const toggleFullscreen = () => {
         if (!videoRef.current && !videoContainerRef.current) return;
 
-        let vid = videoRef.current
-        var isInFullscreen = document.fullscreenElement;
-
-        if (!isInFullscreen) {
+        if (!document.fullscreenElement) {
             if (videoContainerRef.current !== null && videoContainerRef.current.requestFullscreen) {
                 videoContainerRef.current.requestFullscreen();
             }
@@ -60,8 +58,7 @@ export default function VideoPlayer() {
             return;
         }
         progressRef.current.style.width = (videoRef.current.currentTime / videoRef.current.duration * 100).toString() + "%"
-        console.log(progressRef.current.getBoundingClientRect().right)
-        thumbRef.current.style.left = (progressRef.current.getBoundingClientRect().right) - thumbRef.current.getBoundingClientRect().width / 2 + "px"
+        thumbRef.current.style.left = (progressRef.current.getBoundingClientRect().right) - thumbRef.current.getBoundingClientRect().width + "px"
     }
 
     const placeVideoTime = (e: MouseEvent) => {
@@ -82,7 +79,7 @@ export default function VideoPlayer() {
     }
 
     const documentTimelineUp = (e: MouseEvent) => {
-        if (videoRef.current && videoRef.current.classList.contains("Video-Scrubbing")){
+        if (videoRef.current && videoRef.current.classList.contains("Video-Scrubbing")) {
             videoRef.current.classList.remove("Video-Scrubbing")
             placeVideoTime(e);
             updateTimelineUI();
@@ -90,7 +87,7 @@ export default function VideoPlayer() {
     }
 
     const documentTimelineMove = (e: MouseEvent) => {
-        if (videoRef.current && videoRef.current.classList.contains("Video-Scrubbing")){
+        if (videoRef.current && videoRef.current.classList.contains("Video-Scrubbing")) {
             placeVideoTime(e);
             updateTimelineUI();
         }
@@ -98,6 +95,7 @@ export default function VideoPlayer() {
 
     const onTimeUpdate = () => {
         setCurrentTime(videoRef.current?.currentTime || 0);
+        updateTimelineUI();
     }
 
     useEffect(() => {
@@ -119,10 +117,42 @@ export default function VideoPlayer() {
 
         setDuration(vid.duration);
 
+        const keyHolds = (e: any) => {
+            const tagName = document.activeElement?.tagName.toLowerCase();
+            if (tagName === 'input') return;
+            switch (e.key.toLowerCase()) {
+                case 'arrowright':
+                case 'l':
+                    vid.currentTime += 5;
+                    break;
+                case 'arrowleft':
+                case 'j':
+                    vid.currentTime -= 5;
+                    break;
+                case 'arrowup':
+                    setVolume(prev => {
+                        let v = Math.min(prev + .1, 1)
+                        if (volumeInputRef.current) volumeInputRef.current.value = (v * 100).toString()
+                        return v;
+                    });
+                    break;
+                case 'arrowdown':
+                    setVolume(prev => {
+                        let v = Math.max(prev - .1, 0)
+                        if (volumeInputRef.current) volumeInputRef.current.value = (v * 100).toString()
+                        return v;
+                    });
+                    break;
+                default:
+                    break;
+            }
+        }
+
         const keyPresses = (e: any) => {
             e.preventDefault()
             const tagName = document.activeElement?.tagName.toLowerCase();
             if (tagName === 'input') return;
+            console.log(e.key.toLowerCase())
             switch (e.key.toLowerCase()) {
                 case ' ':
                     if (tagName === 'button') return;
@@ -143,6 +173,7 @@ export default function VideoPlayer() {
         }
 
         document.addEventListener("keyup", keyPresses)
+        document.addEventListener("keydown", keyHolds)
         document.addEventListener("fullscreenchange", onFullScreenChange);
         document.addEventListener("mozfullscreenchange", onFullScreenChange);
         document.addEventListener("webkitfullscreenchange", onFullScreenChange);
@@ -158,6 +189,7 @@ export default function VideoPlayer() {
 
         return () => {
             document.removeEventListener("keyup", keyPresses);
+            document.removeEventListener("keyhold", keyHolds)
             document.removeEventListener("fullscreenchange", onFullScreenChange);
             document.removeEventListener("mozfullscreenchange", onFullScreenChange);
             document.removeEventListener("webkitfullscreenchange", onFullScreenChange);
@@ -184,7 +216,7 @@ export default function VideoPlayer() {
                                 mb-[.5rem] bg-[rgba(193,193,193,0.5)] hover:h-[10px] rounded-md'
                         ref={timelineRef}>
                         <div className='absolute opacity-0 w-[1em] h-[1em] overflow-visible rounded-full bg-[#0caadc] bottom-[-75%]
-                                group-hover/timelineBar:bottom-[-25%] group-hover/timelineBar:opacity-100 z-10 pointer-events-none mr-[50%]' ref={thumbRef} />
+                                group-hover/timelineBar:bottom-[-25%] group-hover/timelineBar:opacity-100 z-10 pointer-events-none' ref={thumbRef} />
                         <div className='progressBarColors flex relative w-full h-full overflow-hidden'>
                             <div
                                 className='playProgress h-full z-[1] bg-[#0caadc] relative rounded-md'
@@ -235,6 +267,7 @@ export default function VideoPlayer() {
                             <div className='group-hover/volume:opacity-100 group-hover/volume:w-full group-hover/volume:block w-0 opacity-0 hidden'>
                                 <input
                                     id="volumeInput"
+                                    ref={volumeInputRef}
                                     className="cursor-pointer"
                                     type="range"
                                     min="0"

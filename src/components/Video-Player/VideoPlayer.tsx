@@ -1,8 +1,19 @@
 import { FullscreenIcon, Pause, Play, PlaySquare, Slash, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { DetailedHTMLProps, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
 import { secondsToHHMMSS } from "./utils"
 
-export default function VideoPlayer() {
+// Unhides types in LSP.
+// Exp. Instead of the LSP saying VideoPlayerProps. It becomes { src: string, videoProps?: HTMLVideoProps, ...}
+type Prettify<T> = {
+    [K in keyof T]: T[K];
+} & {}
+
+export type VideoPlayerProps = {
+    src: string
+    videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
+}
+
+export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [_playing, setPlaying] = useState<boolean>(false)
     const [_fullscreen, setFullscreen] = useState<boolean>(false)
     const [autoplay, setAutoPlay] = useState<boolean>(false)
@@ -208,8 +219,8 @@ export default function VideoPlayer() {
     return (
         <div className="h-fit">
             <div ref={videoContainerRef} className='flex h-fit bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
-                <video ref={videoRef} onClick={handlePlayPauseClick} autoPlay={autoplay}>
-                    <source src="test.mkv" />
+                <video ref={videoRef} onClick={handlePlayPauseClick} autoPlay={autoplay} {...props.videoProps}>
+                    <source src={props.src || props.videoProps?.src} />
                 </video>
                 <div className="Bottom-Controls block w-full absolute bottom-0 px-2">
                     <div

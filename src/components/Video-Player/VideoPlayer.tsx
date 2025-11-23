@@ -1,6 +1,7 @@
-import { FullscreenIcon, Pause, Play, PlaySquare, Slash, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
+import { FullscreenIcon, Pause, Play, PlaySquare, Settings, Slash, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
 import { DetailedHTMLProps, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
 import { secondsToHHMMSS } from "./utils"
+import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
 
 // Unhides types in LSP.
 // Exp. Instead of the LSP saying VideoPlayerProps. It becomes { src: string, videoProps?: HTMLVideoProps, ...}
@@ -11,6 +12,7 @@ type Prettify<T> = {
 export type VideoPlayerProps = {
     src: string
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
+    videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback">>
 }
 
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
@@ -19,6 +21,8 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [autoplay, setAutoPlay] = useState<boolean>(false)
     const [muted, setMuted] = useState<boolean>(false)
     const [volume, setVolume] = useState<number>(1)
+    const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
+    const [playbackRate, setPlaybackRate] = useState<number>(1)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -30,6 +34,11 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
 
     const [currentTime, setCurrentTime] = useState<number>(videoRef.current?.currentTime || 0);
     const [duration, setDuration] = useState<number>(videoRef.current?.duration || 0);
+
+    const playbackRateCallback = (p: number) => {
+        console.log(p)
+        setPlaybackRate(p);
+    }
 
     const handlePlayPauseClick = () => {
         if (videoRef.current) {
@@ -109,6 +118,11 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
         setCurrentTime(videoRef.current?.currentTime || 0);
         updateTimelineUI();
     }
+
+    useEffect(() => {
+        if (!videoRef.current) return;
+        videoRef.current.playbackRate = playbackRate
+    }, [playbackRate])
 
     useEffect(() => {
         if (!videoRef.current) return;
@@ -295,6 +309,14 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                                 <Slash className={`absolute top-0 left-0 transition-discrete duration-300 ${!autoplay ? "opacity-100 w-full block" : "opacity-0 w-0 hidden"}`} />
                             </div>
                         </button>
+                        <div className="flex flex-row gap-2 w-fit">
+                            <button onClick={() => setSettingsOpen(!settingsOpen)} id={"Video-Player-Settings-Btn"} className="relative">
+                                <Settings />
+                            </button>
+                            {settingsOpen &&
+                                <VideoSettings {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback} />
+                            }
+                        </div>
                         <button title="Fullscreen" onClick={toggleFullscreen}>
                             <FullscreenIcon />
                         </button>

@@ -5,6 +5,6 @@ export const Route = createFileRoute('/')({ component: App })
 
 function App() {
     return (
-        <VideoPlayer src='test.mkv' videoProps={{preload: "metadata"}}/>
+        <VideoPlayer src='test.mkv' videoProps={{preload: "metadata"}} videoPlayerSettingsProps={{playbackRateOptions:true}}/>
     )
 }

@@ -1,4 +1,4 @@
-import { FullscreenIcon, Pause, Play, PlaySquare, Settings, Slash, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
+import { FullscreenIcon, Pause, Play, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
 import { DetailedHTMLProps, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
 import { secondsToHHMMSS } from "./utils"
 import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
@@ -19,7 +19,6 @@ export type VideoPlayerProps = {
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [_playing, setPlaying] = useState<boolean>(false)
     const [_fullscreen, setFullscreen] = useState<boolean>(false)
-    const [autoplay, setAutoPlay] = useState<boolean>(false)
     const [muted, setMuted] = useState<boolean>(false)
     const [volume, setVolume] = useState<number>(1)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
@@ -243,7 +242,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     return (
         <div className="h-fit">
             <div ref={videoContainerRef} className='flex h-fit bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
-                <video ref={videoRef} onClick={handlePlayPauseClick} autoPlay={autoplay} {...props.videoProps}>
+                <video ref={videoRef} onClick={handlePlayPauseClick} {...props.videoProps}>
                     <source src={props.src || props.videoProps?.src} />
                 </video>
                 <div className="Bottom-Controls block w-full absolute bottom-0 px-2">
@@ -313,12 +312,6 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                             </div>
                         </div>
                         <div className="grow" />
-                        <button className="group/autoplay" onClick={() => setAutoPlay(!autoplay)}>
-                            <div className="relative">
-                                <PlaySquare />
-                                <Slash className={`absolute top-0 left-0 transition-discrete duration-300 ${!autoplay ? "opacity-100 w-full block" : "opacity-0 w-0 hidden"}`} />
-                            </div>
-                        </button>
                         <div className="flex flex-row gap-2 w-fit">
                             <button onClick={() => setSettingsOpen(!settingsOpen)} id={"Video-Player-Settings-Btn"} className="relative">
                                 <Settings />

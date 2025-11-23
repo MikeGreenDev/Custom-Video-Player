@@ -1,5 +1,5 @@
-import { FullscreenIcon, Pause, Play, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
-import { DetailedHTMLProps, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
+import { FullscreenIcon, Pause, Play, Repeat, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
+import { DetailedHTMLProps, ReactNode, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
 import { secondsToHHMMSS } from "./utils"
 import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
 
@@ -9,11 +9,20 @@ type Prettify<T> = {
     [K in keyof T]: T[K];
 } & {}
 
+export type VideoPlayerCustomBtn = {
+    value: boolean
+    iconNodeTrue: ReactNode | ReactNode[]
+    iconNodeFalse: ReactNode | ReactNode[]
+    callback: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+}
+
 export type VideoPlayerProps = {
     src: string
     onVideoEnd?: () => void
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
     videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback">>
+    customBtns?: VideoPlayerCustomBtn[]
+    loopBtn: boolean
 }
 
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
@@ -23,6 +32,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [volume, setVolume] = useState<number>(1)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
     const [playbackRate, setPlaybackRate] = useState<number>(1)
+    const [loop, setLoop] = useState<boolean>(props.videoProps?.loop || false)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -199,7 +209,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
         }
 
         const onEnded = () => {
-            if (props.onVideoEnd){
+            if (props.onVideoEnd) {
                 props.onVideoEnd();
             }
         }
@@ -242,7 +252,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     return (
         <div className="h-fit">
             <div ref={videoContainerRef} className='flex h-fit bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
-                <video ref={videoRef} onClick={handlePlayPauseClick} {...props.videoProps}>
+                <video ref={videoRef} onClick={handlePlayPauseClick} {...props.videoProps} loop={loop}>
                     <source src={props.src || props.videoProps?.src} />
                 </video>
                 <div className="Bottom-Controls block w-full absolute bottom-0 px-2">
@@ -312,6 +322,33 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                             </div>
                         </div>
                         <div className="grow" />
+                        {
+                            props.customBtns &&
+                            <div className="flex flex-row gap-2 w-fit">
+                                {props.customBtns.map((v, i) => {
+                                    if (v.value) {
+                                        return (
+                                            <button key={"Custom-Buttons-" + i} onClick={v.callback} className="relative">
+                                                {v.iconNodeTrue}
+                                            </button>
+                                        )
+                                    } else {
+                                        return (
+                                            <button key={"Custom-Buttons-" + i} onClick={v.callback} className="relative">
+                                                {v.iconNodeFalse}
+                                            </button>
+                                        )
+                                    }
+                                })}
+                            </div>
+                        }
+                        {props.loopBtn &&
+                            <div className="flex flex-row gap-2 w-fit">
+                                <button onClick={() => setLoop(prev => !prev)} className="relative">
+                                    <Repeat color={loop ? "#0caadc" : "currentColor"}/>
+                                </button>
+                            </div>
+                        }
                         <div className="flex flex-row gap-2 w-fit">
                             <button onClick={() => setSettingsOpen(!settingsOpen)} id={"Video-Player-Settings-Btn"} className="relative">
                                 <Settings />

@@ -11,6 +11,7 @@ type Prettify<T> = {
 
 export type VideoPlayerProps = {
     src: string
+    onVideoEnd?: () => void
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
     videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback">>
 }
@@ -198,12 +199,20 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
             }
         }
 
+        const onEnded = () => {
+            if (props.onVideoEnd){
+                props.onVideoEnd();
+            }
+        }
+
         document.addEventListener("keyup", keyPresses)
         document.addEventListener("keydown", keyHolds)
         document.addEventListener("fullscreenchange", onFullScreenChange);
         document.addEventListener("mozfullscreenchange", onFullScreenChange);
         document.addEventListener("webkitfullscreenchange", onFullScreenChange);
         document.addEventListener("msfullscreenchange", onFullScreenChange);
+
+        vid.addEventListener("ended", onEnded);
 
         vid.addEventListener("timeupdate", onTimeUpdate);
 
@@ -225,6 +234,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                 document.removeEventListener("mouseup", documentTimelineUp)
                 document.removeEventListener("mousemove", documentTimelineMove)
             }
+            vid.removeEventListener("ended", onEnded);
 
             vid.removeEventListener("timeupdate", onTimeUpdate);
         }

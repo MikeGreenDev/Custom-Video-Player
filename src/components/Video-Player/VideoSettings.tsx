@@ -1,4 +1,5 @@
-import { cn } from "@/lib/utils"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 import { ArrowLeft } from "lucide-react"
 import { useState } from "react"
 
@@ -17,9 +18,14 @@ export type VideoSettingsProps = {
 }
 
 export default function VideoSettings(props: Prettify<VideoSettingsProps>) {
+    // So now only the tailwind-merge library is needed.
+    function cn(...inputs: ClassValue[]) {
+        return twMerge(clsx(inputs))
+    }
+
     const [page, setPage] = useState<SettingPages>(SettingPages.MAIN)
 
-    const settingBtnStyles  = "hover:bg-black hover:text-[#0caadc] rounded-md";
+    const settingBtnStyles = "hover:bg-black hover:text-[#0caadc] rounded-md";
     const settingBtnPadding = "px-8 py-1";
 
     const getPage = (p: SettingPages) => {
@@ -41,13 +47,13 @@ export default function VideoSettings(props: Prettify<VideoSettingsProps>) {
                             <div className="flex flex-col">
                                 <button className={settingBtnStyles} onClick={() => setPage(SettingPages.MAIN)}>
                                     <div className="flex flex-row gap-1 py-2">
-                                        <ArrowLeft className="my-auto"/>
+                                        <ArrowLeft className="my-auto" />
                                         Back
                                     </div>
                                 </button>
                                 <div className="flex flex-col">
                                     {(Array.isArray(props.playbackRateOptions) ? props.playbackRateOptions : [1, .75, .50, .25]).map((p, i) => (
-                                        <button key={p + i} className={cn(settingBtnStyles, settingBtnPadding)} onClick={() => {if (props.playbackRateCallback) props.playbackRateCallback(p)}}>
+                                        <button key={p + i} className={cn(settingBtnStyles, settingBtnPadding)} onClick={() => { if (props.playbackRateCallback) props.playbackRateCallback(p) }}>
                                             {p}
                                         </button>
                                     ))}

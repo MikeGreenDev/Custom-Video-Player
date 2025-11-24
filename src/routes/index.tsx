@@ -22,6 +22,7 @@ function App() {
             onVideoEnd={videoEndedCallback}
             customBtns={[{value: favoriteValue, iconNodeTrue: <Star fill='yellow' color='yellow' />, iconNodeFalse: <Star />, callback: favoriteCallback}]}
             loopBtn
+            color='#0C0C0C'
             />
     )
 }

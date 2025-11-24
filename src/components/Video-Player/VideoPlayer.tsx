@@ -22,7 +22,8 @@ export type VideoPlayerProps = {
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
     videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback">>
     customBtns?: VideoPlayerCustomBtn[]
-    loopBtn: boolean
+    loopBtn?: boolean
+    color?: string
 }
 
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
@@ -33,6 +34,8 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
     const [playbackRate, setPlaybackRate] = useState<number>(1)
     const [loop, setLoop] = useState<boolean>(props.videoProps?.loop || false)
+    const color = props.color || "#0caadc"
+    console.log(color)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -260,11 +263,14 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                         className='group/timelineBar relative flex cursor-pointer overflow-visible w-full transiton-[height] duration-[0.1s] ease-linear h-[6px]
                                 mb-[.5rem] bg-[rgba(193,193,193,0.5)] hover:h-[10px] rounded-md'
                         ref={timelineRef}>
-                        <div className='absolute opacity-0 w-[1em] h-[1em] overflow-visible rounded-full bg-[#0caadc] bottom-[-75%]
-                                group-hover/timelineBar:bottom-[-25%] group-hover/timelineBar:opacity-100 z-10 pointer-events-none' ref={thumbRef} />
+                        <div className={`absolute opacity-0 w-[1em] h-[1em] overflow-visible rounded-full bottom-[-75%]
+                                group-hover/timelineBar:bottom-[-25%] group-hover/timelineBar:opacity-100 z-10 pointer-events-none`} ref={thumbRef}
+                            style={{ background: color }}
+                        />
                         <div className='progressBarColors flex relative w-full h-full overflow-hidden'>
                             <div
-                                className='playProgress h-full z-[1] bg-[#0caadc] relative rounded-md'
+                                className={`playProgress h-full z-[1] relative rounded-md`}
+                                style={{ background: color }}
                                 ref={progressRef}
                             >
                             </div>
@@ -313,7 +319,10 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                                 <input
                                     id="volumeInput"
                                     ref={volumeInputRef}
-                                    className="cursor-pointer"
+                                    className={`cursor-pointer border-1 border-slate-400 rounded-xl accent-(--user-color)`}
+                                    style={{
+                                        "--user-color": color,
+                                    } as any}
                                     type="range"
                                     min="0"
                                     max="100"
@@ -322,8 +331,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                             </div>
                         </div>
                         <div className="grow" />
-                        {
-                            props.customBtns &&
+                        {props.customBtns &&
                             <div className="flex flex-row gap-2 w-fit">
                                 {props.customBtns.map((v, i) => {
                                     if (v.value) {
@@ -345,7 +353,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                         {props.loopBtn &&
                             <div className="flex flex-row gap-2 w-fit">
                                 <button onClick={() => setLoop(prev => !prev)} className="relative">
-                                    <Repeat color={loop ? "#0caadc" : "currentColor"}/>
+                                    <Repeat color={loop ? color : "currentColor"} />
                                 </button>
                             </div>
                         }

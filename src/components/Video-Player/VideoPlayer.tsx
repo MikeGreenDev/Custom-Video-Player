@@ -35,7 +35,6 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [playbackRate, setPlaybackRate] = useState<number>(1)
     const [loop, setLoop] = useState<boolean>(props.videoProps?.loop || false)
     const color = props.color || "#0caadc"
-    console.log(color)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const videoContainerRef = useRef<HTMLDivElement>(null)
@@ -49,7 +48,6 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [duration, setDuration] = useState<number>(videoRef.current?.duration || 0);
 
     const playbackRateCallback = (p: number) => {
-        console.log(p)
         setPlaybackRate(p);
     }
 
@@ -191,7 +189,6 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
             e.preventDefault()
             const tagName = document.activeElement?.tagName.toLowerCase();
             if (tagName === 'input') return;
-            console.log(e.key.toLowerCase())
             switch (e.key.toLowerCase()) {
                 case ' ':
                     if (tagName === 'button') return;

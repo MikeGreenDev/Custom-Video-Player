@@ -7,13 +7,14 @@ export const Route = createFileRoute('/')({ component: App })
 
 function App() {
     const [favoriteValue, setFavoriteValue] = useState<boolean>(false)
+
     const videoEndedCallback = () => {
         console.log("Video Ended");
     }
 
     const favoriteCallback = (_e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         setFavoriteValue(prev => !prev)
-        // Could Use a db to add it to a favorites list
+        // Exp. Could Use a db to add/remove it from a favorites list
     }
 
     return (

@@ -1,7 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
 import { ArrowLeft } from "lucide-react"
-import { useState } from "react"
+import { ReactNode, useState } from "react"
 
 type Prettify<T> = {
     [K in keyof T]: T[K];
@@ -13,20 +11,29 @@ enum SettingPages {
 }
 
 export type VideoSettingsProps = {
+    color?: string
     playbackRateOptions?: number[] | boolean
     playbackRateCallback?: (playback: number) => void
 }
 
 export default function VideoSettings(props: Prettify<VideoSettingsProps>) {
-    // So now only the tailwind-merge library is needed.
-    function cn(...inputs: ClassValue[]) {
-        return twMerge(clsx(inputs))
+    const color = props.color || "#0caadc"
+
+    function SettingsBtn({ children, noPadding, ...props }: { children?: ReactNode | ReactNode[], noPadding?: boolean } & React.ComponentProps<"button">): React.ReactNode {
+        return (
+            <button
+                style={{
+                    "--user-color": color,
+                } as any}
+                className={`hover:bg-black hover:text-(--user-color) rounded-md ${noPadding ? "" : "px-8 py-1"}`}
+                {...props}
+            >
+                {children}
+            </button>
+        )
     }
 
     const [page, setPage] = useState<SettingPages>(SettingPages.MAIN)
-
-    const settingBtnStyles = "hover:bg-black hover:text-[#0caadc] rounded-md";
-    const settingBtnPadding = "px-8 py-1";
 
     const getPage = (p: SettingPages) => {
         switch (p) {
@@ -34,9 +41,9 @@ export default function VideoSettings(props: Prettify<VideoSettingsProps>) {
                 return (
                     <>
                         {props.playbackRateOptions &&
-                            <button className={cn(settingBtnStyles, settingBtnPadding)} onClick={() => setPage(SettingPages.PLAYBACK_RATE)}>
+                            <SettingsBtn onClick={() => setPage(SettingPages.PLAYBACK_RATE)}>
                                 Playback Rate
-                            </button>
+                            </SettingsBtn>
                         }
                     </>
                 )
@@ -45,17 +52,17 @@ export default function VideoSettings(props: Prettify<VideoSettingsProps>) {
                     <>
                         {props.playbackRateOptions &&
                             <div className="flex flex-col">
-                                <button className={settingBtnStyles} onClick={() => setPage(SettingPages.MAIN)}>
+                                <SettingsBtn noPadding onClick={() => setPage(SettingPages.MAIN)}>
                                     <div className="flex flex-row gap-1 py-2">
                                         <ArrowLeft className="my-auto" />
                                         Back
                                     </div>
-                                </button>
+                                </SettingsBtn>
                                 <div className="flex flex-col">
                                     {(Array.isArray(props.playbackRateOptions) ? props.playbackRateOptions : [1, .75, .50, .25]).map((p, i) => (
-                                        <button key={p + i} className={cn(settingBtnStyles, settingBtnPadding)} onClick={() => { if (props.playbackRateCallback) props.playbackRateCallback(p) }}>
+                                        <SettingsBtn key={p + i} onClick={() => { if (props.playbackRateCallback) props.playbackRateCallback(p) }}>
                                             {p}
-                                        </button>
+                                        </SettingsBtn>
                                     ))}
                                 </div>
                             </div>

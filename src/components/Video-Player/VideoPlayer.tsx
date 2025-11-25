@@ -359,7 +359,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                                 <Settings />
                             </button>
                             {settingsOpen &&
-                                <VideoSettings {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback} />
+                                <VideoSettings color={color} {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback} />
                             }
                         </div>
                         <button title="Fullscreen" onClick={toggleFullscreen}>

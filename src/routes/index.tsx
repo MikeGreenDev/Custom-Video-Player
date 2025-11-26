@@ -18,12 +18,13 @@ function App() {
     }
 
     return (
-        <VideoPlayer src='test.mkv' videoProps={{ preload: "metadata" }}
+        <VideoPlayer src='We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.mkv' videoProps={{ preload: "metadata" }} captions="advanced"
             videoPlayerSettingsProps={{ playbackRateOptions: true }}
             onVideoEnd={videoEndedCallback}
-            customBtns={[{value: favoriteValue, iconNodeTrue: <Star fill='yellow' color='yellow' />, iconNodeFalse: <Star />, callback: favoriteCallback}]}
+            customBtns={[{ value: favoriteValue, iconNodeTrue: <Star fill='yellow' color='yellow' />, iconNodeFalse: <Star />, callback: favoriteCallback }]}
             loopBtn
             color='#0C0C0C'
-            />
+            captionFiles={[{ fileSrc: "We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.en.vtt", shorthand: "En", lang: "en", langDisplay: "English" }]}
+        />
     )
 }

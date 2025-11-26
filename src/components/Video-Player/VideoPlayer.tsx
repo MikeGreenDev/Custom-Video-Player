@@ -1,4 +1,4 @@
-import { FullscreenIcon, Pause, Play, Repeat, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
+import { Captions, CaptionsOff, FullscreenIcon, Pause, Play, Repeat, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
 import { DetailedHTMLProps, ReactNode, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
 import { secondsToHHMMSS } from "./utils"
 import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
@@ -16,6 +16,17 @@ export type VideoPlayerCustomBtn = {
     callback: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
 }
 
+export type CaptionObject = {
+    // En 2 or En (auto-generated)
+    shorthand: string
+    // Src that the caption file is at
+    fileSrc: string
+    // 2 character language code (EN, ES, FR)
+    lang: string
+    // Spelt out language (English, Spanish, French)
+    langDisplay: string
+}
+
 export type VideoPlayerProps = {
     src: string
     onVideoEnd?: () => void
@@ -24,6 +35,8 @@ export type VideoPlayerProps = {
     customBtns?: VideoPlayerCustomBtn[]
     loopBtn?: boolean
     color?: string
+    captionFiles?: CaptionObject[]
+    captions?: boolean | "on" | "off" | "advanced"
 }
 
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
@@ -33,10 +46,14 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [volume, setVolume] = useState<number>(1)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
     const [playbackRate, setPlaybackRate] = useState<number>(1)
+    const [captionIdx, _setCaptionIdx] = useState<number>(0)
+    const [captionShow, setCaptionShow] = useState<boolean>(typeof (props.captions) == 'boolean' ? props.captions : props.captions == "on" || props.captions == "advanced" ? true : false)
     const [loop, setLoop] = useState<boolean>(props.videoProps?.loop || false)
     const color = props.color || "#0caadc"
 
     const videoRef = useRef<HTMLVideoElement>(null)
+    const captionRef = useRef<HTMLDivElement>(null)
+    const captionTrackRef = useRef<HTMLTrackElement>(null)
     const videoContainerRef = useRef<HTMLDivElement>(null)
     const timelineRef = useRef<HTMLDivElement>(null)
     const thumbRef = useRef<HTMLDivElement>(null)
@@ -146,6 +163,49 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     }, [muted, volume]);
 
     useEffect(() => {
+        if (!videoRef.current || !captionShow) {
+            return
+        }
+
+        const updateCues = () => {
+            if (!videoRef.current || !captionTrackRef.current) return
+            const textTrack = videoRef.current.textTracks[0]
+            const cues = textTrack.activeCues
+            if (cues == null) return;
+            const c: VTTCue = cues[0] as VTTCue
+            console.log(textTrack)
+            console.log(c);
+            if (cues.length > 0) {
+                if (captionRef.current) {
+                    if (c.track) {
+                        captionRef.current.innerHTML = c.text
+                        captionRef.current.style.alignSelf = c.align
+                        captionRef.current.style.position = c.position.toString() + "%"
+                        captionRef.current.style.fontSize = c.size + "%"
+                        captionRef.current.style.bottom = (100 - Number(c.line)).toString() + "%"
+                        captionRef.current.hidden = false;
+                    } else {
+                        captionRef.current.hidden = true
+                    }
+                }
+            }
+        }
+
+        const vid = videoRef.current;
+        if (props.captions == "advanced"){
+            vid.textTracks[0].mode = 'hidden'
+            vid.textTracks[0].addEventListener("cuechange", updateCues)
+        }
+
+        return () => {
+            if (vid.textTracks[0]) {
+                vid.textTracks[0].removeEventListener("cuechange", updateCues)
+            }
+        }
+    }, [captionShow])
+
+
+    useEffect(() => {
         if (!videoRef.current) {
             return
         }
@@ -251,11 +311,18 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
 
     return (
         <div className="h-fit">
-            <div ref={videoContainerRef} className='flex h-fit bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
+            <div ref={videoContainerRef} className='flex h-fit text-3xl bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
                 <video ref={videoRef} onClick={handlePlayPauseClick} {...props.videoProps} loop={loop}>
                     <source src={props.src || props.videoProps?.src} />
+                    {captionShow &&
+                        <track ref={captionTrackRef} kind="captions" src={props.captionFiles ? props.captionFiles[captionIdx].fileSrc : undefined} default />
+                    }
                 </video>
-                <div className="Bottom-Controls block w-full absolute bottom-0 px-2">
+                {captionShow && props.captions == "advanced" &&
+                    <div hidden ref={captionRef} className={`SubtitleContainer text-center absolute bottom-20 whitespace-pre-wrap p-2 ${props.captionFiles && captionIdx != null ? "block" : "hidden"}`}>
+                    </div>
+                }
+                <div className="Bottom-Controls block w-full absolute bottom-0 px-2 text-lg">
                     <div
                         className='group/timelineBar relative flex cursor-pointer overflow-visible w-full transiton-[height] duration-[0.1s] ease-linear h-[6px]
                                 mb-[.5rem] bg-[rgba(193,193,193,0.5)] hover:h-[10px] rounded-md'
@@ -347,6 +414,15 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                                 })}
                             </div>
                         }
+                        <div className="flex flex-row gap-2 w-fit">
+                            <button onClick={() => setCaptionShow(prev => !prev)} className="relative">
+                                {captionShow ?
+                                    <CaptionsOff />
+                                    :
+                                    <Captions />
+                                }
+                            </button>
+                        </div>
                         {props.loopBtn &&
                             <div className="flex flex-row gap-2 w-fit">
                                 <button onClick={() => setLoop(prev => !prev)} className="relative">

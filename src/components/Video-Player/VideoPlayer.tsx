@@ -11,8 +11,7 @@ type Prettify<T> = {
 
 export type VideoPlayerCustomBtn = {
     value: boolean
-    iconNodeTrue: ReactNode | ReactNode[]
-    iconNodeFalse: ReactNode | ReactNode[]
+    iconNode: ReactNode | ReactNode[]
     callback: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
 }
 
@@ -405,21 +404,11 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                         <div className="grow" />
                         {props.customBtns &&
                             <div className="flex flex-row gap-2 w-fit">
-                                {props.customBtns.map((v, i) => {
-                                    if (v.value) {
-                                        return (
-                                            <button key={"Custom-Buttons-" + i} onClick={v.callback} className="relative">
-                                                {v.iconNodeTrue}
-                                            </button>
-                                        )
-                                    } else {
-                                        return (
-                                            <button key={"Custom-Buttons-" + i} onClick={v.callback} className="relative">
-                                                {v.iconNodeFalse}
-                                            </button>
-                                        )
-                                    }
-                                })}
+                                {props.customBtns.map((v, i) => (
+                                    <button key={"Custom-Buttons-" + i} onClick={v.callback} className="relative">
+                                        {v.iconNode}
+                                    </button>
+                                ))}
                             </div>
                         }
                         <div className="flex flex-row gap-2 w-fit">
@@ -445,7 +434,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                             {settingsOpen &&
                                 <VideoSettings color={color} {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback}
                                     captionFiles={props.captionFiles} captionIdx={captionIdx} setCaptionIdx={setCaptionIdx}
-                                    captionStyles={{state: captionStyles, dispatch: dispatch}} />
+                                    captionStyles={{ state: captionStyles, dispatch: dispatch }} />
                             }
                         </div>
                         <button title="Fullscreen" onClick={toggleFullscreen}>

@@ -22,7 +22,7 @@ function App() {
         <VideoPlayer src='We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.mkv' videoProps={{ preload: "metadata" }} captions="advanced"
             videoPlayerSettingsProps={{ playbackRateOptions: true }}
             onVideoEnd={videoEndedCallback}
-            customBtns={[{ value: favoriteValue, iconNodeTrue: <Star fill='yellow' color='yellow' />, iconNodeFalse: <Star />, callback: favoriteCallback }]}
+            customBtns={[{ value: favoriteValue, iconNode: favoriteValue ? <Star fill='yellow' color='yellow' /> : <Star />, callback: favoriteCallback }]}
             loopBtn
             captionFiles={[
                 { fileSrc: "We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.en.vtt", shorthand: "En", lang: "en", langDisplay: "English" },

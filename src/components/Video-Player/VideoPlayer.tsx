@@ -31,7 +31,7 @@ export type VideoPlayerProps = {
     src: string
     onVideoEnd?: () => void
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
-    videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback" | "captionIdx">>
+    videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback" | "captionIdx" | "captionStyles" | "captionFiles">>
     customBtns?: VideoPlayerCustomBtn[]
     loopBtn?: boolean
     color?: string
@@ -445,7 +445,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                             {settingsOpen &&
                                 <VideoSettings color={color} {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback}
                                     captionFiles={props.captionFiles} captionIdx={captionIdx} setCaptionIdx={setCaptionIdx}
-                                    captionStyles={{state: captionStyles, dispatch: dispatch}} defaultCaptionState={props.defaultCaptionState}/>
+                                    captionStyles={{state: captionStyles, dispatch: dispatch}} />
                             }
                         </div>
                         <button title="Fullscreen" onClick={toggleFullscreen}>

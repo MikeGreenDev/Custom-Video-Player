@@ -2,6 +2,8 @@ import { Captions, CaptionsOff, FullscreenIcon, Pause, Play, Repeat, Settings, V
 import { DetailedHTMLProps, ReactNode, useEffect, useReducer, useRef, useState, VideoHTMLAttributes } from "react"
 import { AddAlphaToRGBColor, captionReducer, CaptionState, characterEdgeTextShadow, defaultCaptionState, secondsToHHMMSS } from "./utils"
 import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
+import { twMerge } from "tailwind-merge"
+import { clsx } from "clsx"
 
 // Unhides types in LSP.
 // Exp. Instead of the LSP saying VideoPlayerProps. It becomes { src: string, videoProps?: HTMLVideoProps, ...}
@@ -28,6 +30,7 @@ export type CaptionObject = {
 
 export type VideoPlayerProps = {
     src: string
+    className?: string
     onVideoEnd?: () => void
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
     videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback" | "captionIdx" | "captionStyles" | "captionFiles">>
@@ -104,11 +107,11 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     };
 
     const updateTimelineUI = () => {
-        if (!videoRef.current || !timelineRef.current || !progressRef.current || !bufferRef.current || !thumbRef.current) {
+        if (!videoRef.current || !timelineRef.current || !progressRef.current || !bufferRef.current || !thumbRef.current || !videoContainerRef.current) {
             return;
         }
         progressRef.current.style.width = (videoRef.current.currentTime / videoRef.current.duration * 100).toString() + "%"
-        thumbRef.current.style.left = (progressRef.current.getBoundingClientRect().right) - thumbRef.current.getBoundingClientRect().width + "px"
+        thumbRef.current.style.left = (progressRef.current.getBoundingClientRect().right - thumbRef.current.getBoundingClientRect().width) - videoContainerRef.current.getBoundingClientRect().left + "px"
     }
 
     const placeVideoTime = (e: MouseEvent) => {
@@ -174,8 +177,8 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
             const cues = textTrack.activeCues
             if (cues == null) return;
             const c: VTTCue = cues[0] as VTTCue
-            console.log(textTrack)
-            console.log(c);
+            // console.log(textTrack)
+            // console.log(c);
             if (cues.length > 0) {
                 if (captionRef.current) {
                     if (c.track) {
@@ -183,7 +186,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                         captionRef.current.style.alignSelf = c.align
                         captionRef.current.style.position = c.position.toString() + "%"
                         captionRef.current.style.fontSize = c.size + "%"
-                        captionRef.current.style.bottom = (100 - Number(c.line)).toString() + "%"
+                        captionRef.current.style.bottom = `max(calc(${(100 - Number(c.line))}% - ${captionRef.current.getBoundingClientRect().height}px), 0px)`
                         captionRef.current.hidden = false;
                     } else {
                         captionRef.current.hidden = true
@@ -311,8 +314,8 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     }, [])
 
     return (
-        <div className="h-fit">
-            <div ref={videoContainerRef} className='flex h-fit text-3xl bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group' id="videoContainer">
+        <div className={twMerge(clsx("h-full aspect-video mx-auto", props.className))}>
+            <div ref={videoContainerRef} className={'flex h-full aspect-video text-3xl bg-[rgb(41,41,41)] flex-col items-center justify-center relative overflow-hidden group'} id="videoContainer">
                 <video ref={videoRef} onClick={handlePlayPauseClick} {...props.videoProps} loop={loop}>
                     <source src={props.src || props.videoProps?.src} />
                     {captionShow &&

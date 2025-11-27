@@ -19,7 +19,10 @@ function App() {
     }
 
     return (
+        <>
+        <div className='h-80 w-full' />
         <VideoPlayer src='We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.mkv' videoProps={{ preload: "metadata" }} captions="advanced"
+            className='h-[60vh] aspect-video mx-auto'
             videoPlayerSettingsProps={{ playbackRateOptions: true }}
             onVideoEnd={videoEndedCallback}
             customBtns={[{ value: favoriteValue, iconNode: favoriteValue ? <Star fill='yellow' color='yellow' /> : <Star />, callback: favoriteCallback }]}
@@ -41,5 +44,6 @@ function App() {
 
             }
         />
+        </>
     )
 }

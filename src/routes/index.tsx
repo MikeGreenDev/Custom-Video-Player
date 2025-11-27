@@ -1,3 +1,4 @@
+import { CaptionColor } from '@/components/Video-Player/utils';
 import VideoPlayer from '@/components/Video-Player/VideoPlayer'
 import { createFileRoute } from '@tanstack/react-router'
 import { Star } from 'lucide-react';
@@ -23,8 +24,22 @@ function App() {
             onVideoEnd={videoEndedCallback}
             customBtns={[{ value: favoriteValue, iconNodeTrue: <Star fill='yellow' color='yellow' />, iconNodeFalse: <Star />, callback: favoriteCallback }]}
             loopBtn
-            color='#0C0C0C'
-            captionFiles={[{ fileSrc: "We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.en.vtt", shorthand: "En", lang: "en", langDisplay: "English" }]}
+            captionFiles={[
+                { fileSrc: "We Played a 72 Hour Game of Tag Across Europe-q2tJqO6nCSc-Jet Lag： The Game.en.vtt", shorthand: "En", lang: "en", langDisplay: "English" },
+                { fileSrc: "FakeEn.en.vtt", shorthand: "En Fake", lang: "en", langDisplay: "Fake Eng" }
+            ]}
+            defaultCaptionState={
+                {
+                    "color": CaptionColor.green,
+                    "background-color": CaptionColor.black,
+                    "background-opacity": "25%",
+                    "font-size": "1.5em",
+                    "outline-color": CaptionColor.yellow,
+                    "character-edge": "None",
+                    "edge-color": CaptionColor.black
+                }
+
+            }
         />
     )
 }

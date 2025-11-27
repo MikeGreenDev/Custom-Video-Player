@@ -1,6 +1,6 @@
 import { Captions, CaptionsOff, FullscreenIcon, Pause, Play, Repeat, Settings, Volume, Volume1Icon, Volume2Icon, VolumeX } from "lucide-react"
-import { DetailedHTMLProps, ReactNode, useEffect, useRef, useState, VideoHTMLAttributes } from "react"
-import { secondsToHHMMSS } from "./utils"
+import { DetailedHTMLProps, ReactNode, useEffect, useReducer, useRef, useState, VideoHTMLAttributes } from "react"
+import { AddAlphaToRGBColor, captionReducer, CaptionState, characterEdgeTextShadow, defaultCaptionState, secondsToHHMMSS } from "./utils"
 import VideoSettings, { VideoSettingsProps } from "./VideoSettings"
 
 // Unhides types in LSP.
@@ -31,12 +31,13 @@ export type VideoPlayerProps = {
     src: string
     onVideoEnd?: () => void
     videoProps?: Prettify<Partial<DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>>>
-    videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback">>
+    videoPlayerSettingsProps?: Prettify<Omit<VideoSettingsProps, "playbackRateCallback" | "captionIdx">>
     customBtns?: VideoPlayerCustomBtn[]
     loopBtn?: boolean
     color?: string
     captionFiles?: CaptionObject[]
     captions?: boolean | "on" | "off" | "advanced"
+    defaultCaptionState?: CaptionState
 }
 
 export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
@@ -46,10 +47,11 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
     const [volume, setVolume] = useState<number>(1)
     const [settingsOpen, setSettingsOpen] = useState<boolean>(false)
     const [playbackRate, setPlaybackRate] = useState<number>(1)
-    const [captionIdx, _setCaptionIdx] = useState<number>(0)
+    const [captionIdx, setCaptionIdx] = useState<number>(0)
     const [captionShow, setCaptionShow] = useState<boolean>(typeof (props.captions) == 'boolean' ? props.captions : props.captions == "on" || props.captions == "advanced" ? true : false)
     const [loop, setLoop] = useState<boolean>(props.videoProps?.loop || false)
     const color = props.color || "#0caadc"
+    const [captionStyles, dispatch] = useReducer(captionReducer, props?.defaultCaptionState || defaultCaptionState)
 
     const videoRef = useRef<HTMLVideoElement>(null)
     const captionRef = useRef<HTMLDivElement>(null)
@@ -192,7 +194,7 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
         }
 
         const vid = videoRef.current;
-        if (props.captions == "advanced"){
+        if (props.captions == "advanced") {
             vid.textTracks[0].mode = 'hidden'
             vid.textTracks[0].addEventListener("cuechange", updateCues)
         }
@@ -319,7 +321,13 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                     }
                 </video>
                 {captionShow && props.captions == "advanced" &&
-                    <div hidden ref={captionRef} className={`SubtitleContainer text-center absolute bottom-20 whitespace-pre-wrap p-2 ${props.captionFiles && captionIdx != null ? "block" : "hidden"}`}>
+                    <div hidden ref={captionRef} className={`SubtitleContainer text-center absolute bottom-20 whitespace-pre-wrap p-2 ${props.captionFiles && captionIdx != null ? "block" : "hidden"}`}
+                        style={{
+                            color: captionStyles.color, backgroundColor: AddAlphaToRGBColor(captionStyles["background-color"], captionStyles["background-opacity"]),
+                            fontSize: captionStyles["font-size"], outlineColor: captionStyles["outline-color"],
+                            textShadow: characterEdgeTextShadow(captionStyles["character-edge"], captionStyles["edge-color"]),
+                        }}
+                    >
                     </div>
                 }
                 <div className="Bottom-Controls block w-full absolute bottom-0 px-2 text-lg">
@@ -435,7 +443,9 @@ export default function VideoPlayer(props: Prettify<VideoPlayerProps>) {
                                 <Settings />
                             </button>
                             {settingsOpen &&
-                                <VideoSettings color={color} {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback} />
+                                <VideoSettings color={color} {...props.videoPlayerSettingsProps} playbackRateCallback={playbackRateCallback}
+                                    captionFiles={props.captionFiles} captionIdx={captionIdx} setCaptionIdx={setCaptionIdx}
+                                    captionStyles={{state: captionStyles, dispatch: dispatch}} defaultCaptionState={props.defaultCaptionState}/>
                             }
                         </div>
                         <button title="Fullscreen" onClick={toggleFullscreen}>
